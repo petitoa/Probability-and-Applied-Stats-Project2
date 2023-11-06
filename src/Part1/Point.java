@@ -1,3 +1,5 @@
+package Part1;
+
 public class Point {
     private double xValue;
     private double yValue;
