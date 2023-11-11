@@ -1,4 +1,4 @@
-% Prevent Octave from thinking that this is a function file:
+% Not function file:
 1;
 
 function smooth_and_save(input_file, output_file, window_value, iterations)
@@ -24,6 +24,13 @@ function smooth_and_save(input_file, output_file, window_value, iterations)
     % Save the smoothed data to the output file
     csvwrite(unique_output_file, smoothed_data);
   end
+  % Plot the last smoothed iteration
+  last_output_file = sprintf('%s_iteration%d.csv', output_file, iterations);
+  last_smoothed_data = csvread(last_output_file);
+  plot(last_smoothed_data(:, 1), last_smoothed_data(:, 2));
+  title('Last Smoothed Iteration');
+  xlabel('X-axis');
+  ylabel('Y-axis');
 end
 
 % Call the smooth_and_save with window value and iterations
