@@ -1,7 +1,7 @@
-% Prevent Octave from thinking that this is a function file:
+% Not function file:
 1;
 
-function salt(input_file, output_file)
+function salt_and_graph(input_file, output_file)
   % Read points csv
   input_data = csvread(input_file);
 
@@ -29,8 +29,15 @@ function salt(input_file, output_file)
   salted_data = input_data;
   salted_data(:, 2) = salted_y;
 
-  % Save the salted data to a new CSV file
+  % Save the salted data to CSV file
   csvwrite(output_file, salted_data);
+
+  % Plot salted data
+  plot(salted_data(:, 1), salted_data(:, 2));
+  title('Salted Graph');
+  xlabel('X-axis');
+  ylabel('Y-axis');
 end
 
-salt('octave-points.csv', 'salted-points.csv');
+% Call the function with specific file names
+salt_and_graph('octave-points.csv', 'salted-points.csv');

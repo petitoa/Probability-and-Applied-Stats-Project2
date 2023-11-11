@@ -1,5 +1,4 @@
-# Prevent Octave from thinking that this
-# is a function file:
+# Not function file:
 
 1;
 
