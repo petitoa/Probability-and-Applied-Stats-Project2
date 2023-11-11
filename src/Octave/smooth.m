@@ -34,4 +34,4 @@ function smooth_and_save(input_file, output_file, window_value, iterations)
 end
 
 % Call the smooth_and_save with window value and iterations
-smooth_and_save('salted-points.csv', 'smoothed-points', 4, 20);
+smooth_and_save('salted-points.csv', 'smoothed-points', 15, 20);
