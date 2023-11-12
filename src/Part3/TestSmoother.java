@@ -13,7 +13,7 @@ public class TestSmoother extends JFrame {
 
         double[][] saltedData = salt.generateSaltedXYPlot(xYPlot, 0, 100);
 
-        test.smoother(saltedData, 10, 50);
+        test.smoother(saltedData, 10, 10);
 
     }
 }

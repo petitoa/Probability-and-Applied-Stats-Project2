@@ -1,6 +1,6 @@
 package Part3;
 
-import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;

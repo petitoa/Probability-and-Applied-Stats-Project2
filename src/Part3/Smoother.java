@@ -1,6 +1,5 @@
 package Part3;
 
-import Part1.Point;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -9,7 +8,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import javax.swing.*;
-import java.util.Arrays;
 
 public class Smoother extends JFrame {
 
