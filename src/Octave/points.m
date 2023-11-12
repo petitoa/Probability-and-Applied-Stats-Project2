@@ -1,8 +1,7 @@
 # Not function file:
-
 1;
 
-% Define range for x values 0 - 385 with .2 increment
+% Define range for x values 0 - 40 with .2 increment
 x = 0:0.2:40;
 
 % Function to calculate the data
