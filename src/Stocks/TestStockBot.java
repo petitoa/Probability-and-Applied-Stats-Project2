@@ -2,8 +2,11 @@ package Stocks;
 
 import java.util.ArrayList;
 
+/**
+ * The TestStockBot class serves as a test for the StockBot functionality.
+ */
 public class TestStockBot {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         StockBot test = new StockBot();
 
@@ -14,6 +17,6 @@ public class TestStockBot {
 
         double finalNetWorth = test.completeRun(netWorth, stocks).getNetWorth();
 
-        System.out.println("With a starting net worth of $" + netWorth.getNetWorth() + " the finalized net worth after all runs is " + finalNetWorth);
+        System.out.println("With a starting value of $10000 the finalized net worth after all runs is $" + netWorth.getNetWorth());
     }
 }

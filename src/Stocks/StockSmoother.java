@@ -1,12 +1,21 @@
 package Stocks;
 
-import Part1.Point;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * The StockSmoother class provides methods for smoothing stock data using a moving window and writing the smoothed data to a CSV file.
+ */
 public class StockSmoother {
+
+    /**
+     * Smooths the given list of stock data using a moving window.
+     *
+     * @param stocks      The list of stock data points to be smoothed.
+     * @param windowValue The size of the moving window (number of data points on each side of the current point).
+     * @return The list of smoothed stock data points.
+     */
     public ArrayList<Stock> stockSmoother(ArrayList<Stock> stocks, int windowValue) {
         ArrayList<Stock> smoothedStocks = new ArrayList<>();
 
@@ -33,6 +42,12 @@ public class StockSmoother {
         return smoothedStocks;
     }
 
+    /**
+     * Writes the smoothed data to a new CSV file.
+     *
+     * @param inputFile   The name of the CSV file containing stock data.
+     * @param windowValue The size of the moving window (number of data points on each side of the current point).
+     */
     public void stockSmoothToCsv(String inputFile, int windowValue) {
         File file = new File(inputFile);
 

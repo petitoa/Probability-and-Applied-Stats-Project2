@@ -5,8 +5,19 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * The StockBot class represents a bot for managing a simulated stock portfolio.
+ * It includes methods for loading stock data from a CSV file, running a simulation, and evaluating trades by day.
+ */
 public class StockBot {
 
+    /**
+     * Loads stock data from a given CSV file and returns an ArrayList of Stock objects.
+     *
+     * @param inputFile The input file containing stock data.
+     * @return An ArrayList of Stock objects representing the loaded stock data.
+     * @throws RuntimeException If the file is not found.
+     */
     public ArrayList<Stock> loadStocks(String inputFile) {
         File file = new File(inputFile);
 
@@ -34,7 +45,15 @@ public class StockBot {
         return stocks;
     }
 
-    public NetWorth completeRun(NetWorth networth, ArrayList<Stock> stocks) {
+    /**
+     * Runs a complete simulation of stock trading based on the provided stock data from the loaded CSV file.
+     * Updates the net worth of the portfolio.
+     *
+     * @param netWorth The initial NetWorth object representing the portfolio's net worth.
+     * @param stocks   The ArrayList of Stock objects representing the stock data.
+     * @return The NetWorth object after completing the simulation.
+     */
+    public NetWorth completeRun(NetWorth netWorth, ArrayList<Stock> stocks) {
         ArrayList<Stock> traversedStocks = new ArrayList<>();
 
         double heuristic;
@@ -46,26 +65,49 @@ public class StockBot {
 
             // calculate new heuristic and determine trade for the day
             heuristic = updateInternalData(traversedStocks);
-            int determinedTrade = tradeEvaluator(networth, heuristic, openValue);
+            int determinedTrade = tradeEvaluator(netWorth, heuristic, openValue);
 
             // update net worth accordingly
-            networth.updatePortfolio(determinedTrade, openValue);
+            netWorth.updatePortfolio(determinedTrade, openValue);
         }
-        return networth;
+        return netWorth;
     }
 
+    /**
+     * Calculating the heuristic (mean) based on a specified window of past stock data.
+     *
+     * @param stocks The ArrayList of Stock objects representing the traversed stock data.
+     * @return The calculated heuristic based on the window of past stock data.
+     */
     public double updateInternalData(ArrayList<Stock> stocks) {
-        double stocksTotal = 0;
-        for (Stock stock : stocks) {
-            double openValue = stock.getOpenValue();
-            stocksTotal += openValue;
+        // look at stocks within a certain window
+        int windowSize = 5;
+
+        // handles cases where less days than the window value have passed
+        int startIndex = Math.max(0, stocks.size() - windowSize);
+
+        double totalStocksValue = 0;
+        for (int i = startIndex; i < stocks.size(); i++) {
+            double openValue = stocks.get(i).getOpenValue();
+            totalStocksValue += openValue;
         }
-        return stocksTotal / stocks.size();
+
+        return totalStocksValue / Math.min(windowSize, stocks.size());
     }
 
-    // number of stocks to sell per day based on mean of traversed stocks so far
+
+    /**
+     * Evaluates the number of stocks to buy or sell based on the net worth, heuristic (mean), and current stock price.
+     * This value never exceeds 1% of the portfolios total value
+     *
+     * @param netWorth  The current NetWorth object representing the portfolio's net worth.
+     * @param heuristic The calculated heuristic (mean) based on recent stock data.
+     * @param openValue The current stock price.
+     * @return The number of stocks to buy (positive) or sell (negative) based on the evaluation.
+     */
     public int tradeEvaluator(NetWorth netWorth, double heuristic, double openValue) {
         if (openValue < heuristic) {
+            // .01 (never more than one percent of portfolio in a day)
             return (int) ((.01 * netWorth.getNetWorth()) / openValue);
         } else if (openValue > heuristic) {
             return -(int) ((.01 * netWorth.getNetWorth()) / openValue);
@@ -74,4 +116,5 @@ public class StockBot {
             return 0;
         }
     }
+
 }
