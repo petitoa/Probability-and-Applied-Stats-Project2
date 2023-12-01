@@ -20,6 +20,6 @@ public class TestStockBot extends JFrame {
 
         test.graphRsi(stocks);
 
-        System.out.println("With a starting value of $10000 the finalized net worth after all runs is $" + netWorth.getNetWorth());
+        System.out.println("With a starting value of $10000 the finalized net worth after all runs is $" + finalNetWorth);
     }
 }
