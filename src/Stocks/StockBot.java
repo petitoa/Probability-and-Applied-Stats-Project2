@@ -131,9 +131,9 @@ public class StockBot extends JFrame {
         if (index < 14) {
             if (openValue < heuristic) {
                 // .01 (never more than one percent of portfolio in a day)
-                return (int) ((0.01 * netWorth.getNetWorth()) / openValue);
+                return (int) ((0.32 * netWorth.getNetWorth()) / openValue);
             } else if (openValue > heuristic) {
-                return -(int) ((0.01 * netWorth.getNetWorth()) / openValue);
+                return -(int) ((0.32 * netWorth.getNetWorth()) / openValue);
             } else {
                 return 0;
             }
@@ -143,10 +143,10 @@ public class StockBot extends JFrame {
 
             if (openValue < heuristic && rsiForDay < oversoldThreshold) {
                 // Buy condition: If the stock price is below the mean and RSI indicates oversold
-                return (int) ((0.01 * netWorth.getNetWorth()) / openValue);
+                return (int) ((0.32 * netWorth.getNetWorth()) / openValue);
             } else if (openValue > heuristic && rsiForDay > overboughtThreshold) {
                 // Sell condition: If the stock price is above the mean and RSI indicates overbought
-                return -(int) ((0.01 * netWorth.getNetWorth()) / openValue);
+                return -(int) ((0.32 * netWorth.getNetWorth()) / openValue);
             } else {
                 return 0; // Hold condition: No action
             }
