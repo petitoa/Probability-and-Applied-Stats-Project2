@@ -1,15 +1,23 @@
 package Stocks;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.DefaultXYDataset;
 
 /**
  * The StockBot class represents a bot for managing a simulated stock portfolio.
  * It includes methods for loading stock data from a CSV file, running a simulation, and evaluating trades by day.
  */
-public class StockBot {
+public class StockBot extends JFrame {
 
     /**
      * Loads stock data from a given CSV file and returns an ArrayList of Stock objects.
@@ -36,8 +44,11 @@ public class StockBot {
                 String grabdate = scanner.next().trim();
                 double date = lineNumber;
                 double openValue = Double.parseDouble(scanner.next().trim());
+                double high = Double.parseDouble(scanner.next().trim());
+                double low = Double.parseDouble(scanner.next().trim());
+                double closeValue = Double.parseDouble(scanner.next().trim());
                 scanner.nextLine();
-                stocks.add(new Stock(date, openValue));
+                stocks.add(new Stock(date, openValue, closeValue));
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -56,19 +67,29 @@ public class StockBot {
     public NetWorth completeRun(NetWorth netWorth, ArrayList<Stock> stocks) {
         ArrayList<Stock> traversedStocks = new ArrayList<>();
 
+        // Fill the first 15 values of rsi with zeros
+        ArrayList<Double> rsi = new ArrayList<>(Collections.nCopies(15, 0.0));
+
+        // Calculate RSI for the remaining days and add them to the existing rsi ArrayList
+        rsi.addAll(calculateRsi(stocks));
+
         double heuristic;
+        int index = 0;
         for (Stock stock : stocks) {
             // load open to the traversed stocks
             double date = stock.getDate();
             double openValue = stock.getOpenValue();
-            traversedStocks.add(new Stock(date, openValue));
+            double closeValue = stock.getCloseValue();
+            traversedStocks.add(new Stock(date, openValue, closeValue));
 
             // calculate new heuristic and determine trade for the day
             heuristic = updateInternalData(traversedStocks);
-            int determinedTrade = tradeEvaluator(netWorth, heuristic, openValue);
+            double rsiForDay = rsi.get(index);
+            int determinedTrade = tradeEvaluator(netWorth, heuristic, openValue, rsiForDay, index);
 
             // update net worth accordingly
             netWorth.updatePortfolio(determinedTrade, openValue);
+            index++;
         }
         return netWorth;
     }
@@ -105,16 +126,123 @@ public class StockBot {
      * @param openValue The current stock price.
      * @return The number of stocks to buy (positive) or sell (negative) based on the evaluation.
      */
-    public int tradeEvaluator(NetWorth netWorth, double heuristic, double openValue) {
-        if (openValue < heuristic) {
-            // .01 (never more than one percent of portfolio in a day)
-            return (int) ((.01 * netWorth.getNetWorth()) / openValue);
-        } else if (openValue > heuristic) {
-            return -(int) ((.01 * netWorth.getNetWorth()) / openValue);
-
+    public int tradeEvaluator(NetWorth netWorth, double heuristic, double openValue, double rsiForDay, int index) {
+        //If there are not enough prior dates to calculate rsi use heuristic instead
+        if (index < 14) {
+            if (openValue < heuristic) {
+                // .01 (never more than one percent of portfolio in a day)
+                return (int) ((0.01 * netWorth.getNetWorth()) / openValue);
+            } else if (openValue > heuristic) {
+                return -(int) ((0.01 * netWorth.getNetWorth()) / openValue);
+            } else {
+                return 0;
+            }
         } else {
-            return 0;
+            double overboughtThreshold = 70;
+            double oversoldThreshold = 30;
+
+            if (openValue < heuristic && rsiForDay < oversoldThreshold) {
+                // Buy condition: If the stock price is below the mean and RSI indicates oversold
+                return (int) ((0.01 * netWorth.getNetWorth()) / openValue);
+            } else if (openValue > heuristic && rsiForDay > overboughtThreshold) {
+                // Sell condition: If the stock price is above the mean and RSI indicates overbought
+                return -(int) ((0.01 * netWorth.getNetWorth()) / openValue);
+            } else {
+                return 0; // Hold condition: No action
+            }
         }
     }
 
+    public ArrayList<Double> calculateRsi(ArrayList<Stock> stocks) {
+        int n = 14;
+        ArrayList<Double> rsiValues = new ArrayList<>();
+
+        ArrayList<Stock> traversedStocks = new ArrayList<>();
+
+        // Stores up or down moves for the day. Depending on whether it moves up or down for the day.
+        ArrayList<Double> upMoves = new ArrayList<>();
+        ArrayList<Double> downMoves = new ArrayList<>();
+
+        // Add stocks to traversed stocks
+        for (Stock stock : stocks) {
+            double dateStock = stock.getDate();
+            double openValueStock = stock.getOpenValue();
+            double closeValueStock = stock.getCloseValue();
+
+            traversedStocks.add(new Stock(dateStock, openValueStock, closeValueStock));
+
+            // Check if there are enough past days for the change calculation
+            if (traversedStocks.size() == n) {
+                double closeValue = traversedStocks.get(traversedStocks.size() - 1).getCloseValue();
+                double closeValueMinus1 = traversedStocks.get(traversedStocks.size() - 2).getCloseValue();
+                double change = closeValue - closeValueMinus1;
+
+                // Add value to either upMoves or downMoves
+                if (change > 0) {
+                    upMoves.add(change);
+                    if (upMoves.size() > n) {
+                        upMoves.remove(0);  // Remove the oldest element
+                    }
+                } else if (change < 0) {
+                    downMoves.add(Math.abs(change));
+                    if (downMoves.size() > n) {
+                        downMoves.remove(0);  // Remove the oldest element
+                    }
+                }
+
+                //calculate avgup and avg down. Summing up divide by n.
+                double avgUp = upMoves.stream().mapToDouble(Double::doubleValue).sum() / n;
+                double avgDown = downMoves.stream().mapToDouble(Double::doubleValue).sum() / n;
+
+                //Calculate RS
+                double rs = (avgDown == 0) ? 0 : avgUp / avgDown;
+
+                //Calculate RSI
+                double rsi = 100 - 100 / (1 + rs);
+
+                // Add the calculated RSI for the day to the list
+                rsiValues.add(rsi);
+
+                //remove first element from array when exceeds 14 days list since you need past n days
+                traversedStocks.remove(0);
+            }
+        }
+        return rsiValues;
+    }
+
+
+    public void graphRsi(ArrayList<Stock> stocks) {
+        ArrayList<Double> rsiValues = new ArrayList<>(calculateRsi(stocks));
+
+        double[][] rsi = new double[2][rsiValues.size()];
+
+        double date = 0;
+        for (int i = 0; i < rsiValues.size(); i++) {
+            // Populate the 2D array with date and RSI value
+            rsi[0][i] = date; // X-axis (day)
+            rsi[1][i] = rsiValues.get(i); // Y-axis (RSI value)
+            System.out.printf("Day: %.2f, RSI Value: %.2f%n", rsi[0][i], rsi[1][i]); //Print to terminal for debugging
+            date++;
+        }
+
+        // Create a dataset with the salted data
+        DefaultXYDataset dataset = new DefaultXYDataset();
+        dataset.addSeries("RSI For Data", rsi);
+
+
+        // Create the chart
+        JFreeChart chart = ChartFactory.createXYLineChart("RSI For Data", "Day", "RSI Value", dataset, PlotOrientation.VERTICAL, true, true, false);
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        setContentPane(chartPanel);
+
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+
+    }
+
 }
+

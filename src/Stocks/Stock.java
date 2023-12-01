@@ -7,6 +7,7 @@ package Stocks;
 public class Stock {
     private double date;
     private double openValue;
+    private double closeValue;
 
     /**
      * Constructs a new Stock object with the specified attributes.
@@ -14,9 +15,10 @@ public class Stock {
      * @param date      The x value representing the date of the stock data point.
      * @param openValue The y value representing the opening value of the stock.
      */
-    public Stock(double date, double openValue) {
+    public Stock(double date, double openValue, double closeValue) {
         this.date = date;
         this.openValue = openValue;
+        this.closeValue = closeValue;
     }
 
     /**
@@ -37,5 +39,8 @@ public class Stock {
         return openValue;
     }
 
+    public double getCloseValue(){
+        return closeValue;
+    }
 }
 

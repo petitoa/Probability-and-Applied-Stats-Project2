@@ -36,7 +36,7 @@ public class StockSmoother {
 
 
             // Add the smoothed point to smoothedPoints
-            smoothedStocks.add(new Stock(stocks.get(i).getDate(), smoothedY));
+            smoothedStocks.add(new Stock(stocks.get(i).getDate(), smoothedY, stocks.get(i).getCloseValue()));
         }
 
         return smoothedStocks;
@@ -67,8 +67,11 @@ public class StockSmoother {
                 String grabdate = scanner.next().trim();
                 double date = lineNumber;
                 double openValue = Double.parseDouble(scanner.next().trim());
+                double high = Double.parseDouble(scanner.next().trim());
+                double low = Double.parseDouble(scanner.next().trim());
+                double closeValue = Double.parseDouble(scanner.next().trim());
                 scanner.nextLine();
-                stocks.add(new Stock(date, openValue));
+                stocks.add(new Stock(date, openValue, closeValue));
             }
 
             ArrayList<Stock> smoothedStocks = new ArrayList<>(stockSmoother(stocks, windowValue));
