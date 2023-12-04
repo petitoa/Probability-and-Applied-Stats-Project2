@@ -1,0 +1,3 @@
+1.) Graphed RSI with JFreeChart.
+2.) Generated JavaDoc for full project 2.
+3.) looping smoother in octave.

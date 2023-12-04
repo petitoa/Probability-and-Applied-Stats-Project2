@@ -130,7 +130,7 @@ public class StockBot extends JFrame {
         //If there are not enough prior dates to calculate rsi use heuristic instead
         if (index < 14) {
             if (openValue < heuristic) {
-                // .01 (never more than one percent of portfolio in a day)
+                // .01 (never more than thirty-two percent of portfolio in a day)
                 return (int) ((0.32 * netWorth.getNetWorth()) / openValue);
             } else if (openValue > heuristic) {
                 return -(int) ((0.32 * netWorth.getNetWorth()) / openValue);
