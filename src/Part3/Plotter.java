@@ -11,8 +11,22 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Plotter class provides methods for generating and displaying XY plots using JFreeChart.
+ * Uses apache commons math library for function.
+ *
+ * @author petitoa
+ */
 public class Plotter extends JFrame {
 
+    /**
+     * Generates and displays an XY plot with data points calculated based on a specified function using JFreeChart.
+     *
+     * @param intervalBetweenPoints The interval between consecutive x values.
+     * @param lowerBound            The lower bound of the X-axis range.
+     * @param upperBound            The upper bound of the X-axis range.
+     * @return The generated XY plot dataset.
+     */
     public double[][] generateXYPlot(double intervalBetweenPoints, double lowerBound, double upperBound) {
 
         double[][] xYPlotDataSet = plotPoints(intervalBetweenPoints, lowerBound, upperBound);
@@ -34,6 +48,12 @@ public class Plotter extends JFrame {
         return xYPlotDataSet;
     }
 
+    /**
+     * Performs a mathematical function on the given X value to calculate the corresponding Y value.
+     *
+     * @param xValue The X value for which the Y value is calculated.
+     * @return The calculated Y value.
+     */
     public double performFunction(double xValue) {
         UnivariateFunction function = x -> Math.pow(x - 20, 2);
 
@@ -44,6 +64,14 @@ public class Plotter extends JFrame {
     }
 
 
+    /**
+     * Calculates the x and y values for a specified function and generates data points within a given range.
+     *
+     * @param intervalBetweenPoints The interval between consecutive X-axis points.
+     * @param lowerBound            The lower bound of the X-axis range.
+     * @param upperBound            The upper bound of the X-axis range.
+     * @return A 2D array representing the generated XY plot points.
+     */
     public double[][] plotPoints(double intervalBetweenPoints, double lowerBound, double upperBound) {
         List<double[]> pointsList = new ArrayList<>();
 

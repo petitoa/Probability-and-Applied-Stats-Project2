@@ -1,5 +1,10 @@
 package Part1;
 
+/**
+ * The Point class represents a point object with an x and y value.
+ *
+ * @author petitoa
+ */
 public class Point {
     private double xValue;
     private double yValue;

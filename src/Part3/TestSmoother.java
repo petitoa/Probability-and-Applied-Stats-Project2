@@ -2,7 +2,11 @@ package Part3;
 
 import javax.swing.*;
 
-
+/**
+ * The TestSmoother class serves as a test for the Smoother functionality.
+ *
+ * @author petitoa
+ */
 public class TestSmoother extends JFrame {
     public static void main(String[] args) {
         Smoother test = new Smoother();

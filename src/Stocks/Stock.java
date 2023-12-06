@@ -3,6 +3,8 @@ package Stocks;
 /**
  * The Stock class represents a data point containing open value of a stock at a specific date.
  * It includes methods for constructing a new Stock object and getting the date and opening value of the stock.
+ *
+ * @author petitoa
  */
 public class Stock {
     private double date;
@@ -22,7 +24,7 @@ public class Stock {
     }
 
     /**
-     * Gets the date (x value) of the stock data point.
+     * Gets the date of the stock data point.
      *
      * @return The date of the stock.
      */
@@ -31,7 +33,7 @@ public class Stock {
     }
 
     /**
-     * Gets the opening value (y value) of the stock data point.
+     * Gets the opening value of the stock data point.
      *
      * @return The opening value of the stock.
      */
@@ -39,7 +41,12 @@ public class Stock {
         return openValue;
     }
 
-    public double getCloseValue(){
+    /**
+     * Gets the closing value of the stock data point.
+     *
+     * @return The opening value of the stock.
+     */
+    public double getCloseValue() {
         return closeValue;
     }
 }

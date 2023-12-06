@@ -2,6 +2,11 @@ package Part1;
 
 import java.util.ArrayList;
 
+/**
+ * The TestPlotter class serves as a test for the Plotter functionality.
+ *
+ * @author petitoa
+ */
 public class TestPlotter {
     public static void main(String[] args) {
         Plotter test = new Plotter();

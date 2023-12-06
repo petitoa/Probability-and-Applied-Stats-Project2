@@ -1,11 +1,21 @@
 package Stocks;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.DefaultXYDataset;
+
+import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
  * The StockSmoother class provides methods for smoothing stock data using a moving window and writing the smoothed data to a CSV file.
+ * Graphs the Smoothed Stocks using JFreeChart.
+ *
+ * @author petitoa
  */
 public class StockSmoother {
 
@@ -43,16 +53,55 @@ public class StockSmoother {
     }
 
     /**
+     * Displays a graph of the smoothed stock data using JFreeChart.
+     *
+     * @param stocks      The list of original stock objects.
+     * @param windowValue The size of the moving window.
+     */
+    public void graphSmoothedStocks(ArrayList<Stock> stocks, int windowValue) {
+        ArrayList<Stock> smoothedValues = new ArrayList<>(stockSmoother(stocks, windowValue));
+
+        double[][] smoothToGraph = new double[2][smoothedValues.size()];
+
+        double date = 0;
+        for (int i = 0; i < smoothedValues.size(); i++) {
+            smoothToGraph[0][i] = date; // X-axis (day)
+            smoothToGraph[1][i] = smoothedValues.get(i).getOpenValue(); // Use the appropriate method to get smoothed value
+            date++;
+        }
+
+        // Create a dataset with the salted data
+        DefaultXYDataset dataset = new DefaultXYDataset();
+        dataset.addSeries("Smoothed Stock Data", smoothToGraph);
+
+        // Create the chart
+        JFreeChart chart = ChartFactory.createXYLineChart("Smoothed Data", "Day", "Stock", dataset, PlotOrientation.VERTICAL, true, true, false);
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        // Set up the JFrame
+        JFrame frame = new JFrame("Smoothed Data");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(chartPanel);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setUndecorated(true);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+
+    /**
      * Writes the smoothed data to a new CSV file.
      *
      * @param inputFile   The name of the CSV file containing stock data.
      * @param windowValue The size of the moving window (number of data points on each side of the current point).
      */
-    public void stockSmoothToCsv(String inputFile, int windowValue) {
+    public ArrayList<Stock> stockSmoothToCsv(String inputFile, int windowValue) {
         File file = new File(inputFile);
 
         ArrayList<Stock> stocks = new ArrayList<>();
 
+        ArrayList<Stock> smoothedStocks;
         try (Scanner scanner = new Scanner(file)) {
             // Store and skip the header
             String header = scanner.nextLine();
@@ -74,7 +123,7 @@ public class StockSmoother {
                 stocks.add(new Stock(date, openValue, closeValue));
             }
 
-            ArrayList<Stock> smoothedStocks = new ArrayList<>(stockSmoother(stocks, windowValue));
+            smoothedStocks = new ArrayList<>(stockSmoother(stocks, windowValue));
 
             try (FileWriter fw = new FileWriter("smoothed-stocks.csv");
                  BufferedWriter bw = new BufferedWriter(fw)) {
@@ -94,5 +143,6 @@ public class StockSmoother {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Error while reading the CSV file", e);
         }
+        return smoothedStocks;
     }
 }

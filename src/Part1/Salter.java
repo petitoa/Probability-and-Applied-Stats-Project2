@@ -5,8 +5,22 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * The Salter class provides methods for salting the y-values of points.
+ * Points are read from a CSV file, salted, and written to a new CSV file.
+ *
+ * @author petitoa
+ */
 public class Salter {
 
+    /**
+     * Salts the given y-value within a specified range.
+     *
+     * @param yValue   The original y-value to be salted.
+     * @param minRange The minimum range for the salt.
+     * @param maxRange The maximum range for the salt.
+     * @return The salted y-value.
+     */
     public double saltYValue(double yValue, double minRange, double maxRange) {
         Random rng = new Random();
         //nextDouble() rng between 0.0 - 1.0, so use the difference and multiply by random add to minimum
@@ -15,6 +29,12 @@ public class Salter {
         return saltedYValue;
     }
 
+    /**
+     * Adds random salt to the y-values of points read from a CSV file then writes the salted points to a new CSV file.
+     *
+     * @param minRange The minimum range for the random salt.
+     * @param maxRange The maximum range for the random salt.
+     */
     public void saltToCsv(double minRange, double maxRange) {
         String filename = "points.csv";
         File file = new File(filename);

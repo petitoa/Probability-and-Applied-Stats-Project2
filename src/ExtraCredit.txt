@@ -1,3 +1,4 @@
-1.) Graphed RSI with JFreeChart.
-2.) Generated JavaDoc for full project 2.
-3.) looping smoother in octave.
+1.) Graphed RSI with JFreeChart displays when TestStockBot is run.
+2.) Graphed Stock Smoother with JFreeChart displays when TestStockSmoother is run.
+3.) Looping smoother in octave. This allows for multiple smoothing iterations to take place allowing for a smoother result.
+4.) Generated JavaDoc for full project 2.

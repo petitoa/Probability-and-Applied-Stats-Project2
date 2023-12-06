@@ -9,8 +9,20 @@ import org.jfree.data.xy.DefaultXYDataset;
 
 import javax.swing.*;
 
+/**
+ * The Smoother class provides a method for smoothing an XY plot dataset and displaying the smoothed data.
+ *
+ * @author petitoa
+ */
 public class Smoother extends JFrame {
 
+    /**
+     * Smooths the provided XY plot dataset using a moving window and displays the smoothed data using JFreeChart.
+     *
+     * @param xYPlotDataSet       The original XY plot dataset.
+     * @param windowValue         The size of the moving window.
+     * @param smoothingIterations The number of iterations for smoothing.
+     */
     public void smoother(double[][] xYPlotDataSet, int windowValue, int smoothingIterations) {
         // Create a new array for smoothed data that contains x values
         double[][] smoothedData = new double[2][xYPlotDataSet[0].length];

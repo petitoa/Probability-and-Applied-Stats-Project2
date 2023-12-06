@@ -4,7 +4,21 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * The GraphSmoother class provides methods for smoothing a set of points using a moving window.
+ * Also, provides functionality for writing the smoothed points to a new CSV file.
+ *
+ * @author petitoa
+ */
 public class GraphSmoother {
+
+    /**
+     * Smoothes the ArrayList of points using a moving window.
+     *
+     * @param points      The ArrayList of points to be smoothed.
+     * @param windowValue The size of the moving window.
+     * @return The ArrayList of smoothed points.
+     */
     public ArrayList<Point> smoother(ArrayList<Point> points, int windowValue) {
         ArrayList<Point> smoothedPoints = new ArrayList<>();
 
@@ -31,6 +45,12 @@ public class GraphSmoother {
         return smoothedPoints;
     }
 
+    /**
+     * Writes the smoothed points to a new CSV file.
+     *
+     * @param inputFile   The name of the CSV file containing the original points.
+     * @param windowValue The size of the moving window.
+     */
     public void smoothToCsv(String inputFile, int windowValue) {
         File file = new File(inputFile);
 

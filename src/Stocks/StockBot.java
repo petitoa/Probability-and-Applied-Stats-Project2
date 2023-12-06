@@ -14,8 +14,11 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.DefaultXYDataset;
 
 /**
- * The StockBot class represents a bot for managing a simulated stock portfolio.
+ * The StockBot class represents a bot for trading with a simulated stock portfolio.
  * It includes methods for loading stock data from a CSV file, running a simulation, and evaluating trades by day.
+ * There are 3 different trade methods.
+ *
+ * @author petitoa
  */
 public class StockBot extends JFrame {
 
@@ -64,17 +67,17 @@ public class StockBot extends JFrame {
      * @param stocks   The ArrayList of Stock objects representing the stock data.
      * @return The NetWorth object after completing the simulation.
      */
-    public NetWorth completeRun(NetWorth netWorth, ArrayList<Stock> stocks) {
+    public NetWorth completeRun(NetWorth netWorth, ArrayList<Stock> stocks, int tradeMethod) {
         ArrayList<Stock> traversedStocks = new ArrayList<>();
 
-        // Fill the first 15 values of rsi with zeros
+        // Fill the first 15 values of rsi with zeros because not enough values to determine
         ArrayList<Double> rsi = new ArrayList<>(Collections.nCopies(15, 0.0));
 
         // Calculate RSI for the remaining days and add them to the existing rsi ArrayList
         rsi.addAll(calculateRsi(stocks));
 
         double heuristic;
-        int index = 0;
+        int day = 0;
         for (Stock stock : stocks) {
             // load open to the traversed stocks
             double date = stock.getDate();
@@ -84,14 +87,40 @@ public class StockBot extends JFrame {
 
             // calculate new heuristic and determine trade for the day
             heuristic = updateInternalData(traversedStocks);
-            double rsiForDay = rsi.get(index);
-            int determinedTrade = tradeEvaluator(netWorth, heuristic, openValue, rsiForDay, index);
-
+            double rsiForDay = rsi.get(day);
+            int determinedTrade = determineTradeMethod(netWorth, heuristic, openValue, rsiForDay, day, tradeMethod);
             // update net worth accordingly
             netWorth.updatePortfolio(determinedTrade, openValue);
-            index++;
+            System.out.println("Day " + day + ": Determined Trade: " + determinedTrade + " End of day networth: " + netWorth.getNetWorth() + " Num of stocks " + netWorth.getStockQuantity());
+            day++;
         }
+
         return netWorth;
+    }
+
+    /**
+     * Determines the trade action based on the specified trade method using int.
+     *
+     * @param netWorth    The current NetWorth object representing the portfolio's net worth.
+     * @param heuristic   The calculated heuristic (mean) based on recent stock data.
+     * @param openValue   The open value for the stock object.
+     * @param rsiForDay   The RSI value for the current day.
+     * @param day         The current day of the simulation.
+     * @param tradeMethod The trade methods:
+     *                    - 1: RSI and Heuristic Trade Evaluator
+     *                    - 2: Buy and Hold
+     *                    - 3: RSI and Moving Average
+     * @return The number of stocks to buy (negative), sell (positive), or take no action (0)
+     * based on the specified trade method.
+     * @throws IllegalArgumentException If an invalid trade method code is provided.
+     */
+    private int determineTradeMethod(NetWorth netWorth, double heuristic, double openValue, double rsiForDay, int day, int tradeMethod) {
+        return switch (tradeMethod) {
+            case 1 -> RsiAndHeuristicTradeEvaluator(netWorth, heuristic, openValue, rsiForDay, day);
+            case 2 -> buyAndHold(netWorth, openValue, day);
+            case 3 -> rsiAndMovingAverage(netWorth, heuristic, openValue, rsiForDay);
+            default -> throw new IllegalArgumentException("Invalid trade method: " + tradeMethod);
+        };
     }
 
     /**
@@ -126,33 +155,97 @@ public class StockBot extends JFrame {
      * @param openValue The current stock price.
      * @return The number of stocks to buy (positive) or sell (negative) based on the evaluation.
      */
-    public int tradeEvaluator(NetWorth netWorth, double heuristic, double openValue, double rsiForDay, int index) {
+    public int RsiAndHeuristicTradeEvaluator(NetWorth netWorth, double heuristic, double openValue, double rsiForDay, int day) {
+        double portfolioPercent = .30;
+
+        // If it's the first day, buy with half of the net worth to establish a portfolio
+        if (day == 0) {
+            return -(int) ((0.5 * netWorth.getNetWorth()) / openValue);
+        }
+
         //If there are not enough prior dates to calculate rsi use heuristic instead
-        if (index < 14) {
+        if (day < 14) {
             if (openValue < heuristic) {
-                // .01 (never more than thirty-two percent of portfolio in a day)
-                return (int) ((0.32 * netWorth.getNetWorth()) / openValue);
+                // .32 (never more than thirty-two percent of portfolio in a day)
+                return -(int) ((portfolioPercent * netWorth.getNetWorth()) / openValue);
             } else if (openValue > heuristic) {
-                return -(int) ((0.32 * netWorth.getNetWorth()) / openValue);
+                return (int) ((portfolioPercent * netWorth.getNetWorth()) / openValue);
             } else {
                 return 0;
             }
         } else {
-            double overboughtThreshold = 70;
+            double overboughtThreshold = 50;
             double oversoldThreshold = 30;
 
             if (openValue < heuristic && rsiForDay < oversoldThreshold) {
                 // Buy condition: If the stock price is below the mean and RSI indicates oversold
-                return (int) ((0.32 * netWorth.getNetWorth()) / openValue);
+                return -(int) ((portfolioPercent * netWorth.getNetWorth()) / openValue);
             } else if (openValue > heuristic && rsiForDay > overboughtThreshold) {
                 // Sell condition: If the stock price is above the mean and RSI indicates overbought
-                return -(int) ((0.32 * netWorth.getNetWorth()) / openValue);
+                return (int) ((portfolioPercent * netWorth.getNetWorth()) / openValue);
             } else {
                 return 0; // Hold condition: No action
             }
         }
     }
 
+    /**
+     * If it is the first day, the method buys stocks with the full portfolio value.
+     * On the last day, it sells all stocks in the portfolio.
+     * Otherwise, it takes no action.
+     *
+     * @param netWorth  The current NetWorth object representing the portfolio's net worth.
+     * @param openValue The open value for the stock object.
+     * @param day       The current day of the simulation.
+     * @return The number of stocks to buy (negative) on the first day, sell (positive) on the last day,
+     * or take no action (0) on other days.
+     */
+    public int buyAndHold(NetWorth netWorth, double openValue, int day) {
+        //If it is the first day
+        if (day == 0) {
+            // buy with full portfolio value
+            return -(int) ((netWorth.getNetWorth()) / openValue);
+            //If it's the last day
+        } else if (day == 250) {
+            // Sell all stocks on the last day
+            return netWorth.getStockQuantity();
+        }
+        return 0; // No action
+    }
+
+    /**
+     * Evaluates the number of stocks to buy or sell based on the net worth, heuristic (mean), and current stock price.
+     * The value of the trade never exceeds 1% of the portfolios total value.
+     *
+     * @param netWorth  The current NetWorth object representing the portfolio's net worth.
+     * @param heuristic The calculated heuristic (mean) based on recent stock data.
+     * @param openValue The open value of the stock.
+     * @param rsiForDay The RSI value for the current day.
+     * @return The number of stocks to buy (negative) or sell (positive) based on the evaluation.
+     */
+    public int rsiAndMovingAverage(NetWorth netWorth, double heuristic, double openValue, double rsiForDay) {
+        double portfolioPercent = .01;
+        double overboughtThreshold = 70;
+        double oversoldThreshold = 30;
+
+        if (openValue < heuristic && rsiForDay < oversoldThreshold) {
+            // Buy: If the stock price is below the mean and RSI indicates oversold
+            return -(int) ((portfolioPercent * netWorth.getNetWorth()) / openValue);
+        } else if (openValue > heuristic && rsiForDay > overboughtThreshold) {
+            // Sell: If the stock price is above the mean and RSI indicates overbought
+            return (int) ((portfolioPercent * netWorth.getNetWorth()) / openValue);
+        } else {
+            return 0; // Hold: No action
+        }
+    }
+
+
+    /**
+     * Calculates the RSI values for each day based on the provided stock data.
+     *
+     * @param stocks The ArrayList of Stock objects representing the stock data.
+     * @return An ArrayList of RSI values for each corresponding day.
+     */
     public ArrayList<Double> calculateRsi(ArrayList<Stock> stocks) {
         int n = 14;
         ArrayList<Double> rsiValues = new ArrayList<>();
@@ -211,6 +304,11 @@ public class StockBot extends JFrame {
     }
 
 
+    /**
+     * Displays the RSI values of stock objects as a graph using JFreeChart.
+     *
+     * @param stocks The ArrayList of Stock objects representing the stock data.
+     */
     public void graphRsi(ArrayList<Stock> stocks) {
         ArrayList<Double> rsiValues = new ArrayList<>(calculateRsi(stocks));
 
