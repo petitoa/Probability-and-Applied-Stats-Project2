@@ -91,7 +91,7 @@ public class StockBot extends JFrame {
             int determinedTrade = determineTradeMethod(netWorth, heuristic, openValue, rsiForDay, day, tradeMethod);
             // update net worth accordingly
             netWorth.updatePortfolio(determinedTrade, openValue);
-            System.out.println("Day " + day + ": Determined Trade: " + determinedTrade + " End of day networth: " + netWorth.getNetWorth() + " Num of stocks " + netWorth.getStockQuantity());
+            System.out.println("Day: " + day + " Determined Trade: " + determinedTrade + " End of day networth: " + netWorth.getNetWorth() + " Num of stocks: " + netWorth.getStockQuantity() + " Trade Method: " + tradeMethod);
             day++;
         }
 
@@ -319,7 +319,6 @@ public class StockBot extends JFrame {
             // Populate the 2D array with date and RSI value
             rsi[0][i] = date; // X-axis (day)
             rsi[1][i] = rsiValues.get(i); // Y-axis (RSI value)
-            System.out.printf("Day: %.2f, RSI Value: %.2f%n", rsi[0][i], rsi[1][i]); //Print to terminal for debugging
             date++;
         }
 
