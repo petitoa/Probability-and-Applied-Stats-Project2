@@ -49,7 +49,7 @@ git clone https://github.com/petitoa/Probability-and-Applied-Stats.git
 
 ### Overview
 
-The Stock Simulator tests 3 algorithms. It contains a network and stock object which can be occupied with CSV files. After simulated trading can be performed.
+The Stock Simulator tests 3 algorithms. It contains a net worth and stock object which can be occupied with CSV files. After simulated trading can be performed.
 
 ### Key Features
 
